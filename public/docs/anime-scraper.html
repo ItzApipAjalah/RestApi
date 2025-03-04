@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Same head content as other docs -->
+    <title>Anime Image Scraper - API Documentation</title>
+</head>
+<body class="bg-dark-900 text-gray-100 min-h-screen">
+    <!-- Mobile Menu Button -->
+    <!-- ... same mobile menu and overlay as other docs ... -->
+
+    <div class="flex">
+        <!-- Sidebar with added anime scraper link -->
+        <div id="sidebar" class="w-64 bg-dark-800 min-h-screen p-4 fixed z-20 transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
+            <!-- ... existing sidebar content ... -->
+            <div class="mb-4">
+                <h2 class="text-gray-400 uppercase text-xs font-semibold mb-2">Scrapers</h2>
+                <ul class="space-y-2">
+                    <li>
+                        <a href="/docs/anime-scraper" class="flex items-center text-gray-300 hover:text-white hover:bg-dark-700 px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-images w-5"></i>
+                            <span class="ml-2">Anime Images</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="w-full lg:ml-64 p-4 lg:p-8">
+            <div class="max-w-3xl mx-auto mt-12 lg:mt-0">
+                <h1 class="text-3xl lg:text-4xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-images mr-3"></i>
+                    Anime Image Scraper
+                </h1>
+                
+                <div class="bg-dark-800 rounded-lg p-4 lg:p-6 mb-4 lg:mb-8">
+                    <h2 class="text-xl font-semibold mb-4">Overview</h2>
+                    <p class="text-gray-400 mb-4">Scrape anime images from a given code.</p>
+                    
+                    <h3 class="text-lg font-semibold mt-6 mb-2">Endpoint</h3>
+                    <div class="bg-dark-700 rounded p-4 mb-4">
+                        <p class="text-sm font-mono">POST /api/scrape/anime</p>
+                    </div>
+
+                    <h3 class="text-lg font-semibold mt-6 mb-2">Request Body</h3>
+                    <div class="bg-dark-700 rounded p-4 mb-4">
+                        <pre class="bg-dark-900 p-3 rounded text-sm overflow-x-auto">
+{
+    "code": "123456"
+}</pre>
+                    </div>
+
+                    <h3 class="text-lg font-semibold mt-6 mb-2">Response</h3>
+                    <div class="bg-dark-700 rounded p-4">
+                        <pre class="bg-dark-900 p-3 rounded text-sm overflow-x-auto">
+{
+    "success": true,
+    "message": "Images found",
+    "data": {
+        "code": "123456",
+        "totalPages": 24,
+        "images": [
+            {
+                "page": 1,
+                "url": "https://example.com/image1.jpg"
+            },
+            {
+                "page": 2,
+                "url": "https://example.com/image2.jpg"
+            }
+            // ... more images
+        ]
+    }
+}</pre>
+                    </div>
+                </div>
+
+                <!-- Example Usage Section -->
+                <div class="bg-dark-800 rounded-lg p-4 lg:p-6">
+                    <h2 class="text-xl font-semibold mb-4">Example Usage</h2>
+                    <div class="bg-dark-700 rounded p-4">
+                        <pre class="bg-dark-900 p-3 rounded text-sm overflow-x-auto">
+fetch('/api/scrape/anime', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        code: '123456'
+    })
+})
+.then(response => response.json())
+.then(data => console.log(data));</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/docs.js"></script>
+</body>
+</html> 

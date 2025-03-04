@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Twitter/X Downloader - API Documentation</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script>
+            tailwind.config = {
+                darkMode: 'class',
+                theme: {
+                    extend: {
+                        colors: {
+                            dark: {
+                                50: '#f9fafb',
+                                100: '#f3f4f6',
+                                200: '#e5e7eb',
+                                300: '#d1d5db',
+                                400: '#9ca3af',
+                                500: '#6b7280',
+                                600: '#4b5563',
+                                700: '#374151',
+                                800: '#1f2937',
+                                900: '#111827',
+                            }
+                        }
+                    }
+                }
+            }
+        </script>
+        <link rel="stylesheet" href="/css/styles.css">
+    </head>
+<body class="bg-dark-900 text-gray-100 min-h-screen">
+    <!-- Mobile Menu Button -->
+    <div class="lg:hidden fixed top-4 left-4 z-20">
+        <button id="mobile-menu-button" class="text-white p-2 focus:outline-none">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Overlay for mobile menu -->
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-10 hidden lg:hidden"></div>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <div id="sidebar" class="w-64 bg-dark-800 min-h-screen p-4 fixed z-20 transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
+            <div class="mb-8">
+                <a href="/" class="block">
+                    <h1 class="text-2xl font-bold text-white mb-2">API Docs</h1>
+                    <p class="text-gray-400 text-sm">v1.0.0</p>
+                </a>
+            </div>
+
+            <!-- Navigation -->
+            <nav>
+                <div class="mb-4">
+                    <h2 class="text-gray-400 uppercase text-xs font-semibold mb-2">Downloaders</h2>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="/docs/tiktok" class="flex items-center text-gray-300 hover:text-white hover:bg-dark-700 px-4 py-2 rounded-lg transition-colors">
+                                <i class="fab fa-tiktok w-5"></i>
+                                <span class="ml-2">TikTok</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/docs/twitter" class="flex items-center text-gray-300 hover:text-white hover:bg-dark-700 px-4 py-2 rounded-lg transition-colors">
+                                <i class="fab fa-twitter w-5"></i>
+                                <span class="ml-2">Twitter/X</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/docs/pinterest" class="flex items-center text-gray-300 hover:text-white hover:bg-dark-700 px-4 py-2 rounded-lg transition-colors">
+                                <i class="fab fa-pinterest w-5"></i>
+                                <span class="ml-2">Pinterest</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="mb-4">
+                    <h2 class="text-gray-400 uppercase text-xs font-semibold mb-2">Tools</h2>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="/docs/upscaler" class="flex items-center text-gray-300 hover:text-white hover:bg-dark-700 px-4 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-image w-5"></i>
+                                <span class="ml-2">Image Upscaler</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <!-- Main Content -->
+        <div class="w-full lg:ml-64 p-4 lg:p-8">
+            <div class="max-w-3xl mx-auto mt-12 lg:mt-0">
+                <h1 class="text-3xl lg:text-4xl font-bold mb-4 flex items-center">
+                    <i class="fab fa-twitter mr-3"></i>
+                    Twitter/X Downloader
+                </h1>
+                
+                <div class="bg-dark-800 rounded-lg p-4 lg:p-6 mb-4 lg:mb-8">
+                    <h2 class="text-xl font-semibold mb-4">Overview</h2>
+                    <p class="text-gray-400 mb-4">Download videos and images from Twitter/X posts.</p>
+                    
+                    <h3 class="text-lg font-semibold mt-6 mb-2">Endpoint</h3>
+                    <div class="bg-dark-700 rounded p-4 mb-4">
+                        <p class="text-sm font-mono">POST /api/download/twitter</p>
+                    </div>
+
+                    <h3 class="text-lg font-semibold mt-6 mb-2">Request Body</h3>
+                    <div class="bg-dark-700 rounded p-4 mb-4">
+                        <pre class="bg-dark-900 p-3 rounded text-sm overflow-x-auto">
+{
+    "url": "https://twitter.com/username/status/1234567890"
+}</pre>
+                    </div>
+
+                    <h3 class="text-lg font-semibold mt-6 mb-2">Response</h3>
+                    <div class="bg-dark-700 rounded p-4">
+                        <pre class="bg-dark-900 p-3 rounded text-sm overflow-x-auto">
+{
+    "success": true,
+    "message": "Media found",
+    "data": {
+        "type": "video|image",
+        "url": "https://example.com/media.mp4"
+    }
+}</pre>
+                    </div>
+                </div>
+
+                <!-- Example Usage Section -->
+                <div class="bg-dark-800 rounded-lg p-4 lg:p-6">
+                    <h2 class="text-xl font-semibold mb-4">Example Usage</h2>
+                    <div class="bg-dark-700 rounded p-4">
+                        <pre class="bg-dark-900 p-3 rounded text-sm overflow-x-auto">
+fetch('/api/download/twitter', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        url: 'https://twitter.com/username/status/1234567890'
+    })
+})
+.then(response => response.json())
+.then(data => console.log(data));</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/docs.js"></script>
+</body>
+</html> 

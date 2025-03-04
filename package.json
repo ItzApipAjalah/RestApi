@@ -1,0 +1,25 @@
+{
+  "name": "tiktokdownloaderapi",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --max-old-space-size=512 --optimize-for-size --gc-interval=100 index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.8.1",
+    "chalk": "^5.4.1",
+    "colors": "^1.4.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.1",
+    "fs-extra": "^11.3.0",
+    "multer": "^1.4.5-lts.1",
+    "pdf-lib": "^1.17.1",
+    "puppeteer": "^23.6.1",
+    "uuid": "^11.1.0"
+  }
+}

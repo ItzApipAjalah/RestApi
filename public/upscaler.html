@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Upscaler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .image-compare {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .image-compare img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .image-compare .before-image {
+            z-index: 1;
+            clip-path: polygon(0 0, var(--clip, 50%) 0, var(--clip, 50%) 100%, 0 100%);
+        }
+        .image-compare .slider {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            cursor: col-resize;
+            opacity: 0;
+            width: 100%;
+        }
+        .image-compare .slider-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: white;
+            left: var(--clip, 50%);
+            z-index: 3;
+            pointer-events: none;
+        }
+        .image-compare .slider-handle {
+            position: absolute;
+            top: 50%;
+            width: 24px;
+            height: 24px;
+            border: 2px solid white;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            left: calc(var(--clip, 50%) - 12px);
+            transform: translateY(-50%);
+            z-index: 3;
+            pointer-events: none;
+        }
+        .image-compare .labels {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            right: 1rem;
+            z-index: 4;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+        .image-compare .label {
+            padding: 0.25rem 0.75rem;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">AI Image Upscaler</h1>
+            <p class="text-gray-600">Enhance your images with AI technology</p>
+        </div>
+
+        <div class="space-y-6">
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <input type="file" 
+                    id="imageFile" 
+                    accept=".jpeg, .jpg, .png"
+                    class="hidden" 
+                    onchange="previewImage(event)">
+                
+                <label for="imageFile" 
+                    class="cursor-pointer flex flex-col items-center justify-center space-y-2">
+                    <div id="preview-container" class="hidden">
+                        <img id="preview" class="max-h-64 rounded-lg mb-4">
+                    </div>
+                    <div id="upload-prompt" class="flex flex-col items-center">
+                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <span class="mt-2 text-gray-600">Click to upload or drag and drop</span>
+                        <span class="text-sm text-gray-500">PNG, JPG, JPEG (Max 5MB)</span>
+                    </div>
+                </label>
+            </div>
+
+            <button onclick="upscaleImage()" 
+                id="upscale-button"
+                class="w-full bg-blue-500 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-600 
+                    transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled>
+                Upscale Image
+            </button>
+
+            <div id="result" class="hidden">
+                <div id="loading" class="text-center py-4 hidden">
+                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-2 text-gray-600">Processing your image... (1-2 minutes)</p>
+                </div>
+                
+                <div id="error" class="hidden">
+                    <div role="alert" class="relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive mt-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert h-4 w-4">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" x2="12" y1="8" y2="12"></line>
+                            <line x1="12" x2="12.01" y1="16" y2="16"></line>
+                        </svg>
+                        <h5 class="mb-1 font-medium leading-none tracking-tight">Error</h5>
+                        <div class="text-sm [&_p]:leading-relaxed">
+                            <span class="error-message"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="success" class="hidden space-y-4">
+                    <div class="image-compare">
+                        <img id="before-image" class="before-image" alt="Original">
+                        <img id="result-image" alt="Upscaled">
+                        <input type="range" class="slider" min="0" max="100" value="50">
+                        <div class="slider-line"></div>
+                        <div class="slider-handle"></div>
+                        <div class="labels">
+                            <span class="label">Before</span>
+                            <span class="label">After</span>
+                        </div>
+                    </div>
+                    <a id="download-link" 
+                        class="block w-full text-center bg-green-500 text-white px-4 py-3 rounded-lg 
+                        font-medium hover:bg-green-600 transition-colors duration-200">
+                        Download Upscaled Image
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const imageFile = document.getElementById('imageFile');
+        const upscaleButton = document.getElementById('upscale-button');
+        const previewContainer = document.getElementById('preview-container');
+        const uploadPrompt = document.getElementById('upload-prompt');
+        const preview = document.getElementById('preview');
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
+                    uploadPrompt.classList.add('hidden');
+                    upscaleButton.disabled = false;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Add image comparison slider functionality
+        function initializeComparison() {
+            const container = document.querySelector('.image-compare');
+            const slider = container.querySelector('.slider');
+            const beforeImage = container.querySelector('.before-image');
+            const sliderLine = container.querySelector('.slider-line');
+            const sliderHandle = container.querySelector('.slider-handle');
+
+            function updateClip(value) {
+                const percent = value + '%';
+                container.style.setProperty('--clip', percent);
+            }
+
+            function handleSlide(event) {
+                let x;
+                if (event.type === 'input') {
+                    x = event.target.value;
+                } else {
+                    const rect = container.getBoundingClientRect();
+                    x = ((event.clientX - rect.left) / rect.width) * 100;
+                    x = Math.min(Math.max(x, 0), 100);
+                    slider.value = x;
+                }
+                updateClip(x);
+            }
+
+            slider.addEventListener('input', handleSlide);
+            updateClip(50); // Initial position
+        }
+
+        async function upscaleImage() {
+            const file = imageFile.files[0];
+            if (!file) return;
+
+            // Show loading
+            document.getElementById('result').classList.remove('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('error').classList.add('hidden');
+            document.getElementById('success').classList.add('hidden');
+            upscaleButton.disabled = true;
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/api/upscale', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Set both before and after images
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('before-image').src = e.target.result;
+                        document.getElementById('result-image').src = data.data.url;
+                        document.getElementById('download-link').href = data.data.url;
+                        document.getElementById('success').classList.remove('hidden');
+                        initializeComparison();
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    document.getElementById('error').classList.remove('hidden');
+                    document.getElementById('error').querySelector('.error-message').textContent = data.message;
+                }
+            } catch (error) {
+                document.getElementById('error').classList.remove('hidden');
+                document.getElementById('error').querySelector('.error-message').textContent = 
+                    'An error occurred. Please try again.';
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+                upscaleButton.disabled = false;
+            }
+        }
+
+        // Add drag and drop support
+        const dropZone = document.querySelector('.border-dashed');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.classList.add('border-blue-500', 'bg-blue-50');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const file = dt.files[0];
+            
+            imageFile.files = dt.files;
+            const event = new Event('change');
+            imageFile.dispatchEvent(event);
+        }
+    </script>
+</body>
+</html> 
